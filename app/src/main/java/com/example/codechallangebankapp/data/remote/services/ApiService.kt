@@ -17,12 +17,13 @@ interface ApiService {
     //Se realiza la peticion POST para el login
     @POST("$END_POINT_LOGIN/{username}/{password}")
     suspend fun loginUserApi(@Path("username") username:String, @Path("password") password:String): LoginResponseDto
-    //Se realiza la peticion GET para obtener los datos de una lista de recursos
+    //Se realiza la peticion GET para obtener los datos de una lista de cuentas
     @GET(END_POINT_ACCOUNT)
     suspend fun getAccountsListApi(@Query("nombreCliente") nombreCliente :String) : AccountsResponseDto
-    //Se realiza la peticion GET para obtener los datos de una lista de recursos
+    //Se realiza la peticion GET para obtener los datos de una lista de cuentas actualizadas
     @GET(END_POINT_ACCOUNT_UPDATED)
     suspend fun getUpdatedAccountsListApi(@Query("nombreCliente") nombreCliente :String) : AccountsResponseDto
+    //Se realiza la peticion GET para obtener los datos de una lista de movimientos de una cuenta
     @GET(END_POINT_ACCOUNT_MOVEMENTS)
     suspend fun getAccountMovementsApi(@Query("numeroCuenta") numeroCuenta :String) : AccountsMovementsResponseDto
 

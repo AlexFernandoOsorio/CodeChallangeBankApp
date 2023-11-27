@@ -1,5 +1,6 @@
 package com.example.codechallangebankapp.core.utils
 
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.example.codechallangebankapp.BuildConfig
 
@@ -13,4 +14,5 @@ object Constants {
 
     const val AUTH_PREFERENCES = "AUTH_PREF"
     val AUTH_KEY = stringSetPreferencesKey("auth_key")
+    val AUTH_TIMER = longPreferencesKey("auth_timer")
 }

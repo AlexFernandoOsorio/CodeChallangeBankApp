@@ -1,7 +1,7 @@
 package com.example.codechallangebankapp.domain.usecases
 
 import com.example.codechallangebankapp.core.utils.FlowResult
-import com.example.codechallangebankapp.domain.models.AccountMovement
+import com.example.codechallangebankapp.domain.models.AccountMovementModel
 import com.example.codechallangebankapp.domain.models.AccountsModel
 import com.example.codechallangebankapp.domain.repositories.AccountsRepository
 import kotlinx.coroutines.flow.flow
@@ -10,6 +10,7 @@ import javax.inject.Inject
 class AccountsUseCase @Inject constructor(
     private val repository: AccountsRepository
 ) {
+
     suspend fun getAccountsListApi(username: String) = flow<FlowResult<AccountsModel>> {
         emit(FlowResult.Loading())
         val accountsList = runCatching {
@@ -34,7 +35,7 @@ class AccountsUseCase @Inject constructor(
         }
     }
 
-    suspend fun getAccountMovementsApi(numeroCuenta: String) = flow<FlowResult<List<AccountMovement>>> {
+    suspend fun getAccountMovementsApi(numeroCuenta: String) = flow<FlowResult<List<AccountMovementModel>>> {
         emit(FlowResult.Loading())
         val accountMovements = runCatching {
             repository.getAccountMovementsApi(numeroCuenta)
@@ -45,4 +46,10 @@ class AccountsUseCase @Inject constructor(
             emit(FlowResult.Error(it.message.toString()))
         }
     }
+
+    suspend fun updateToken(token: String, timer: Long) {
+        repository.updateToken(token,timer)
+    }
+
+    suspend fun getToken() = repository.getToken()
 }

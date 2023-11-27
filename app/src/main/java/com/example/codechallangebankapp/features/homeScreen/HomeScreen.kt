@@ -1,5 +1,6 @@
 package com.example.codechallangebankapp.features.homeScreen
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,12 +9,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,14 +33,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
+import com.example.codechallangebankapp.core.utils.AppTimer
 import com.example.codechallangebankapp.domain.models.AccountsModel
+import com.example.codechallangebankapp.features.MainActivity
 import com.example.codechallangebankapp.features.navigation.AppScreens
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -50,9 +59,14 @@ fun HomeScreen(
     username: String,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-
     LaunchedEffect(Unit) {
         viewModel.getAccountsList(username)
+        val timer = System.currentTimeMillis() + 2 * 60 * 1000
+        viewModel.updateToken(timer)
+        AppTimer.startTimer {
+            navController.popBackStack()
+            navController.navigate(AppScreens.LoginScreen.route)
+        }
     }
     val isLoading by viewModel.isLoadingSwipe.collectAsState()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
@@ -63,7 +77,6 @@ fun HomeScreen(
         )
     }
     ) { innerPadding ->
-
         SwipeRefresh(
             state = swipeRefreshState,
             onRefresh = viewModel::loadSwipeRefresh,
@@ -82,7 +95,7 @@ fun HomeScreen(
                     .fillMaxSize()
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
-                SearchResultsList(viewModel, navController, username)
+                SearchResultsList(viewModel, navController, username,swipeRefreshState.isRefreshing)
             }
         }
     }
@@ -93,7 +106,8 @@ fun HomeScreen(
 fun SearchResultsList(
     viewModel: HomeViewModel,
     navController: NavController,
-    username: String?
+    username: String,
+    swipeRefreshState: Boolean
 ) {
     //recuperamos el estado del viewmodel
     val resultState = viewModel.accountsState.value
@@ -105,7 +119,7 @@ fun SearchResultsList(
                 .padding(horizontal = 40.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            FullScreenLoader()
         }
     }
     //si hay un error mostramos el mensaje, este mensaje contiene el error de la llamada a la api
@@ -116,7 +130,13 @@ fun SearchResultsList(
                 .padding(horizontal = 60.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "resultState.error")
+            ErrorDialog(
+                message = if(!swipeRefreshState)"Ha ocurrido un error, vuelve a intentarlo." else "Vuelve a intentarlo",
+                onDismiss = {
+                    if(!swipeRefreshState) viewModel.getAccountsAgain(username) else viewModel.getAccountsUpdatedAgain(username)
+                },
+                buttonMessage = if(!swipeRefreshState) "Reintentar" else "Aceptar"
+            )
         }
     }
     //si el homeState tiene datos mostramos la lista
@@ -178,6 +198,73 @@ fun ItemView(recipeListData: AccountsModel, index: Int) {
                 color = Color.Black,
                 fontSize = 14.sp
             )
+        }
+    }
+}
+
+@Composable
+fun FullScreenLoader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column (modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.Center))
+        {
+            Spacer(modifier = Modifier.height(120.dp))
+            Image(
+                painterResource(id = R.drawable.piggyimage),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+
+    }
+}
+
+@Composable
+fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit,
+    buttonMessage : String
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+    ) {
+        Box(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = message, color = Color.Black)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { onDismiss() },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(buttonMessage)
+                }
+            }
         }
     }
 }

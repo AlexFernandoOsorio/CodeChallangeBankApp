@@ -24,7 +24,7 @@ object RepositoriesModule {
 
     @Provides
     @Singleton
-    fun providesAccountsRepository(apiService:ApiService): AccountsRepository {
-        return AccountsRepositoryImpl(apiService)
+    fun providesAccountsRepository(apiService:ApiService,preferences: AuthPreferences): AccountsRepository {
+        return AccountsRepositoryImpl(apiService,preferences)
     }
 }

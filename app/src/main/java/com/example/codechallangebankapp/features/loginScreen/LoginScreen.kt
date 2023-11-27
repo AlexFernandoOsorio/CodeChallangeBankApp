@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +60,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
@@ -118,7 +121,6 @@ fun LoginScreen(
             Box(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 Image(
                     painter = backgroundImage,
                     contentDescription = null,
@@ -130,9 +132,9 @@ fun LoginScreen(
                         .fillMaxSize()
 
                 ) {
-                    //if (loginState.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.End))
-                    //}
+                    if (loginState.isLoading) {
+                        FullScreenLoader()
+                    }
                     Spacer(modifier = Modifier.height(100.dp))
                     Image(
                         painterResource(id = R.drawable.piggyimage),
@@ -158,11 +160,13 @@ fun LoginScreen(
                             shape = RoundedCornerShape(8.dp),
                             value = usernameState.text,
                             onValueChange = {
-                                viewModel.setUsername(it)
+                                if (!containsEmoji(it)) {
+                                    viewModel.setUsername(it)
+                                }
                             },
                             label = { Text("Usuario") },
-                            visualTransformation = if (usernameVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             isError = passwordState.error != null,
                             trailingIcon = {
                                 val image = if (usernameVisible)
@@ -283,4 +287,42 @@ fun LoginScreen(
             }
         }
     )
+}
+fun containsEmoji(input: String): Boolean {
+    val emojiPattern = Regex("[\uD83C-\uDBFF\uDC00-\uDFFF\uD800-\uDBFF\uDC00-\uDFFF\u2600-\u2B55\u23F0-\u23F3\u231A\u231B\u23E9-\u23EC\u23F8-\u23FA🥺]")
+    return emojiPattern.containsMatchIn(input)
+}
+
+@Composable
+fun FullScreenLoader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column (modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.Center))
+        {
+            Spacer(modifier = Modifier.height(120.dp))
+            Image(
+                painterResource(id = R.drawable.piggyimage),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+
+    }
 }

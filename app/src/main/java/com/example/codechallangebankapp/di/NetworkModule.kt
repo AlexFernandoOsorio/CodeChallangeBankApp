@@ -30,7 +30,7 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    //Para poder usar el servicio de ApiService en el proyecto
+
     @Singleton
     @Provides
     fun provideApiService(retrofit: Retrofit): ApiService {

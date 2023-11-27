@@ -1,7 +1,7 @@
 package com.example.codechallangebankapp.features.detailScreen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
-import com.example.codechallangebankapp.domain.models.AccountMovement
+import com.example.codechallangebankapp.core.utils.AppTimer
+import com.example.codechallangebankapp.domain.models.AccountMovementModel
+import com.example.codechallangebankapp.features.navigation.AppScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,14 @@ fun DetailScreen(
 ) {
     LaunchedEffect(Unit) {
         viewModel.getAccountMovementsList(numberAccount)
+        val timer = System.currentTimeMillis() + 2 * 60 * 1000
+        viewModel.updateToken(timer)
+        AppTimer.startTimer {
+            navController.popBackStack()
+            navController.navigate(AppScreens.LoginScreen.route)
+        }
     }
+
 
     Scaffold(topBar = {
         TopAppBar(
@@ -171,7 +179,7 @@ fun MovementsResultsList(
                 .padding(horizontal = 40.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            FullScreenLoader()
         }
     }
     //si hay un error mostramos el mensaje, este mensaje contiene el error de la llamada a la api
@@ -182,7 +190,7 @@ fun MovementsResultsList(
                 .padding(horizontal = 60.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "resultState.error")
+            Text(text = "Ha ocurrido un error, vuelve a intentarlo.")
         }
     }
     //si el homeState tiene datos mostramos la lista
@@ -207,7 +215,7 @@ fun MovementsResultsList(
 }
 
 @Composable
-fun Item(recipeListData: AccountMovement) {
+fun Item(recipeListData: AccountMovementModel) {
     Row(
         modifier = Modifier
             .padding(8.dp)
@@ -241,5 +249,39 @@ fun Item(recipeListData: AccountMovement) {
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+fun FullScreenLoader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column (modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.Center))
+        {
+            Spacer(modifier = Modifier.height(120.dp))
+            Image(
+                painterResource(id = R.drawable.piggyimage),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+
     }
 }

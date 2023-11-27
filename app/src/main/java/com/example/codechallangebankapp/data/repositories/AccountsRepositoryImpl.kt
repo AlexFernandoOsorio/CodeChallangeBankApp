@@ -15,24 +15,24 @@ class AccountsRepositoryImpl @Inject constructor(
     private val authPreferences: AuthPreferences
 ) : AccountsRepository {
 
-    //Retorna la lista de cuentas llamando al servicio de la API
+    //Retorna la lista de cuentas llamando al servicio de la API - Remoto
     override suspend fun getAccountsListApi(username: String): AccountsModel {
         return apiService.getAccountsListApi(username).toModel()
     }
-    //Retorna la lista de cuentas actualizada llamando al servicio de la API
+    //Retorna la lista de cuentas actualizada llamando al servicio de la API - Remoto
     override suspend fun getUpdatedAccountsListApi(username: String): AccountsModel {
         return apiService.getUpdatedAccountsListApi(username).toModel()
     }
-    //Retorna la lista de movimientos de una cuenta llamando al servicio de la API
+    //Retorna la lista de movimientos de una cuenta llamando al servicio de la API -
     override suspend fun getAccountMovementsApi(numeroCuenta: String): List<AccountMovementModel> {
         return apiService.getAccountMovementsApi(numeroCuenta).toModel()
     }
-    //Actualiza el token de autenticación
+    //Actualiza el token de autenticación - DataStore
     override suspend fun updateToken(token: String, timer: Long)  {
         authPreferences.saveAuthToken(token,timer)
     }
-    //Retorna el token de autenticación
-    override suspend fun getToken() : Flow<UserToken> {
+    //Retorna el token de autenticación - DataStore
+    override fun getToken() : Flow<UserToken> {
         return authPreferences.getAuthToken()
     }
 }

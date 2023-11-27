@@ -10,7 +10,7 @@ import javax.inject.Inject
 class AccountsUseCase @Inject constructor(
     private val repository: AccountsRepository
 ) {
-
+    //Se realiza la petición de las cuentas
     suspend fun getAccountsListApi(username: String) = flow<FlowResult<AccountsModel>> {
         emit(FlowResult.Loading())
         val accountsList = runCatching {
@@ -22,7 +22,7 @@ class AccountsUseCase @Inject constructor(
             emit(FlowResult.Error(it.message.toString()))
         }
     }
-
+    //Se realiza la petición de las cuentas actualizadas
     suspend fun getUpdatedAccountsListApi(username: String) = flow<FlowResult<AccountsModel>> {
         emit(FlowResult.Loading())
         val accountsList = runCatching {
@@ -34,7 +34,7 @@ class AccountsUseCase @Inject constructor(
             emit(FlowResult.Error(it.message.toString()))
         }
     }
-
+    //Se realiza la petición de los movimientos de la cuenta
     suspend fun getAccountMovementsApi(numeroCuenta: String) = flow<FlowResult<List<AccountMovementModel>>> {
         emit(FlowResult.Loading())
         val accountMovements = runCatching {
@@ -46,10 +46,10 @@ class AccountsUseCase @Inject constructor(
             emit(FlowResult.Error(it.message.toString()))
         }
     }
-
+    //Se realiza la petición de actualizar el token
     suspend fun updateToken(token: String, timer: Long) {
         repository.updateToken(token,timer)
     }
 
-    suspend fun getToken() = repository.getToken()
+    fun getToken() = repository.getToken()
 }

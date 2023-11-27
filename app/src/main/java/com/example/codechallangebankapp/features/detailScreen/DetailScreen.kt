@@ -1,5 +1,7 @@
 package com.example.codechallangebankapp.features.detailScreen
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
+import com.example.codechallangebankapp.core.states.AccountMovementsState
 import com.example.codechallangebankapp.core.utils.AppTimer
 import com.example.codechallangebankapp.domain.models.AccountMovementModel
 import com.example.codechallangebankapp.features.navigation.AppScreens
@@ -49,7 +54,10 @@ fun DetailScreen(
     numberAccount : String,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
+    //recuperamos el estado del viewmodel
+    val resultState = viewModel.accountsMovementsState.value
     LaunchedEffect(Unit) {
+        //se realiza la petición de los movimientos de la cuenta
         viewModel.getAccountMovementsList(numberAccount)
         val timer = System.currentTimeMillis() + 2 * 60 * 1000
         viewModel.updateToken(timer)
@@ -59,7 +67,6 @@ fun DetailScreen(
         }
     }
 
-
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = "Consultas", color = Color.White) },
@@ -68,14 +75,11 @@ fun DetailScreen(
     }
     ){innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
+            modifier = Modifier.padding(innerPadding).fillMaxSize()
         ) {
-            cardAccount(nameAccount,amountAccount,numberAccount)
+            cardAccount(nameAccount,amountAccount,numberAccount,LocalContext.current)
             Spacer(modifier = Modifier.height(8.dp))
-
-            MovementsResultsList(viewModel)
+            MovementsResultsList(resultState)
         }
     }
 }
@@ -85,8 +89,9 @@ fun DetailScreen(
 fun cardAccount(
     nameAccount: String,
     amountAccount: String,
-    numberAccount: String
-) {
+    numberAccount: String,
+    context: Context
+    ) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -146,9 +151,17 @@ fun cardAccount(
                 }
                 Button(
                     onClick = {
+                        // Aquí implementamos la funcionalidad de compartir
+                        val sendIntent: Intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, "Número de cuenta: $numberAccount")
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
                     },
                     modifier = Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 60.dp)
                         .align(Alignment.Bottom),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -167,10 +180,8 @@ fun cardAccount(
 
 @Composable
 fun MovementsResultsList(
-    viewModel: DetailViewModel
+    resultState : AccountMovementsState
 ) {
-    //recuperamos el estado del viewmodel
-    val resultState = viewModel.accountsMovementsState.value
     //si esta cargando mostramos el progressbar
     if (resultState.isLoading) {
         Box(
@@ -190,7 +201,7 @@ fun MovementsResultsList(
                 .padding(horizontal = 60.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "Ha ocurrido un error, vuelve a intentarlo.")
+            Text(text = "Aun no tienes movimientos", color = Color.DarkGray, fontSize = 16.sp)
         }
     }
     //si el homeState tiene datos mostramos la lista
@@ -219,9 +230,9 @@ fun Item(recipeListData: AccountMovementModel) {
     Row(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxSize()
+            .fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(start = 8.dp)) {
+        Column(modifier = Modifier.padding(start = 8.dp).width(200.dp)) {
             Text(
                 text = recipeListData.descripcion,
                 style = MaterialTheme.typography.bodySmall,
@@ -238,7 +249,7 @@ fun Item(recipeListData: AccountMovementModel) {
             )
         }
         Column (modifier = Modifier
-            .padding(start = 16.dp)
+            .padding(start = 8.dp)
             .align(Alignment.CenterVertically)
         ){
             Text(

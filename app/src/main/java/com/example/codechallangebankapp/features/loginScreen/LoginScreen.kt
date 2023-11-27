@@ -3,7 +3,6 @@ package com.example.codechallangebankapp.features.loginScreen
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -50,25 +48,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
 import com.example.codechallangebankapp.core.components.TextFieldState
-import com.example.codechallangebankapp.domain.models.AccountsModel
 import com.example.codechallangebankapp.features.UiState
-import com.example.codechallangebankapp.features.homeScreen.HomeViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -79,19 +70,21 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
-
+    //recuperamos States del viewmodel
     val usernameState = viewModel.usernameState.value
     val passwordState = viewModel.passwordState.value
     val loginState = viewModel.loginState.value
     val scaffoldState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var usernameVisible by rememberSaveable { mutableStateOf(false) }
+    val usernameVisible by rememberSaveable { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val backgroundImage = painterResource(id = R.drawable.loginbackground)
     val keyboardController = LocalSoftwareKeyboardController.current
+    //Se inicializa el evento inicial en la creacion de la pantalla de login
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
+                //Caso Error - Se muestra el snackbar con el mensaje de error
                 is UiState.SnackbarEvent -> {
                     scope.launch {
                         scaffoldState.showSnackbar(
@@ -100,6 +93,7 @@ fun LoginScreen(
                         )
                     }
                 }
+                //Caso Success - Se navega a la pantalla de home
                 is UiState.NavigateEvent -> {
                     scope.launch {
                         scaffoldState.showSnackbar(
@@ -108,6 +102,7 @@ fun LoginScreen(
                         )
                     }
                     navController.popBackStack()
+                    //Agregamos el username al route para poder recuperarlo en la pantalla de home
                     val username = viewModel.usernameState.value.text
                     navController.navigate(event.route + "/$username")
                 }
@@ -132,6 +127,7 @@ fun LoginScreen(
                         .fillMaxSize()
 
                 ) {
+                    //Se muestra el loaderFullScreen cuando isLoading es true
                     if (loginState.isLoading) {
                         FullScreenLoader()
                     }
@@ -153,50 +149,10 @@ fun LoginScreen(
                     )
                     {
                         Spacer(modifier = Modifier.height(16.dp))
-                        TextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            value = usernameState.text,
-                            onValueChange = {
-                                if (!containsEmoji(it)) {
-                                    viewModel.setUsername(it)
-                                }
-                            },
-                            label = { Text("Usuario") },
-
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                            isError = passwordState.error != null,
-                            trailingIcon = {
-                                val image = if (usernameVisible)
-                                    Icons.Filled.Info
-                                else Icons.Filled.Lock
-                                // Localized description for accessibility services
-                                val description =
-                                    if (usernameVisible) "Hide username" else "Show username"
-
-                                // Toggle button to hide or display password
-                                IconButton(onClick = { usernameVisible = !usernameVisible }) {
-                                    Icon(imageVector = image, description)
-                                }
-                            },
-                            maxLines = 1,
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                textColor = MaterialTheme.colorScheme.primary,
-                                containerColor = MaterialTheme.colorScheme.background,
-                                focusedBorderColor = Color.Transparent,
-                                unfocusedBorderColor = Color.Transparent,
-                                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                                placeholderColor = MaterialTheme.colorScheme.tertiary.copy(
-                                    alpha = 0.5f
-                                ),
-                                unfocusedLeadingIconColor = MaterialTheme.colorScheme.tertiary.copy(
-                                    alpha = 0.5f
-                                )
-                            )
-                        )
+                        //Se muestra el TextField para el username sin emojis
+                        TextWithOutEmoji(viewModel = viewModel, usernameState = usernameState, passwordState = passwordState, usernameVisible = usernameVisible)
                         Spacer(modifier = Modifier.height(16.dp))
+                        //Se muestra el TextField para el password
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -211,16 +167,9 @@ fun LoginScreen(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             isError = passwordState.error != null,
                             trailingIcon = {
-                                val image = if (passwordVisible)
-                                    Icons.Filled.Info
-                                else Icons.Filled.Lock
-                                // Localized description for accessibility services
-                                val description =
-                                    if (passwordVisible) "Hide password" else "Show password"
-
-                                // Toggle button to hide or display password
+                                val image = if (passwordVisible) Icons.Filled.Info else Icons.Filled.Lock
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    Icon(imageVector = image, description)
+                                    Icon(imageVector = image, "Hide password")
                                 }
                             },
                             maxLines = 1,
@@ -238,41 +187,30 @@ fun LoginScreen(
                                 )
                             )
                         )
-                        if (passwordState.error != "") {
-                            Text(
-                                text = passwordState.error ?: "",
-                                color = MaterialTheme.colorScheme.error,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
+                        //Se muestra el botón de login
                         Button(
                             onClick = {
+                                //Se realiza la petición de login que llamara a futuro a nuestra API
                                 viewModel.loginUser()
+                                //Se oculta el teclado
                                 keyboardController?.hide()
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             shape = RoundedCornerShape(8.dp),
                         ) {
                             Text(
                                 text = "Continue",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                 modifier = Modifier.padding(vertical = 6.dp)
                             )
                         }
-
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             TextButton(onClick = {
-                                //navigator.navigate(ForgotPasswordScreenDestination)
                             }) {
                                 Text(
                                     text = "Forgot Password?",
@@ -325,4 +263,55 @@ fun FullScreenLoader() {
         }
 
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextWithOutEmoji(
+    viewModel : LoginViewModel,
+    usernameState : TextFieldState,
+    passwordState : TextFieldState,
+    usernameVisible : Boolean
+){
+    var updatedUsernameVisible by rememberSaveable { mutableStateOf(usernameVisible)}
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(8.dp),
+        value = usernameState.text,
+        onValueChange = {
+            if (!containsEmoji(it)) {
+                viewModel.setUsername(it)
+            }
+        },
+        label = { Text("Usuario") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        isError = passwordState.error != null,
+        trailingIcon = {
+            val image = if (updatedUsernameVisible)
+                Icons.Filled.Info
+            else Icons.Filled.Lock
+            val description =
+                if (updatedUsernameVisible) "Hide username" else "Show username"
+            IconButton(onClick = { updatedUsernameVisible = !updatedUsernameVisible }) {
+                Icon(imageVector = image, description)
+            }
+        },
+        maxLines = 1,
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.background,
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+            placeholderColor = MaterialTheme.colorScheme.tertiary.copy(
+                alpha = 0.5f
+            ),
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.tertiary.copy(
+                alpha = 0.5f
+            )
+        )
+    )
+
 }

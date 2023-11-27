@@ -25,25 +25,22 @@ class LoginViewModel @Inject constructor(
     //Se inicializa el estado de la pantalla de login
     private var _loginState = mutableStateOf(LoadState())
     val loginState: State<LoadState> = _loginState
-
     //Se inicializa el evento de la pantalla de login
     private val _eventFlow = MutableSharedFlow<UiState>()
     val eventFlow = _eventFlow.asSharedFlow()
-
     //Se inicializa el estado del email
     private val _usernameState = mutableStateOf(TextFieldState())
     val usernameState: State<TextFieldState> = _usernameState
     fun setUsername(value: String) {
         _usernameState.value = usernameState.value.copy(text = value)
     }
-
     //Se inicializa el estado del password
     private val _passwordState = mutableStateOf(TextFieldState())
     val passwordState: State<TextFieldState> = _passwordState
-
     fun setPassword(value: String) {
         _passwordState.value = passwordState.value.copy(text = value)
     }
+    //Metodo que se encarga de realizar el login
     fun loginUser() {
         //Corutina que realiza la petición de login
         viewModelScope.launch {
@@ -67,12 +64,10 @@ class LoginViewModel @Inject constructor(
                     //En caso de que la petición sea exitosa se navega a la pantalla de Home
                     _eventFlow.emit(UiState.NavigateEvent(AppScreens.HomeScreen.route))
                 }
-
                 is ResourceEvent.Error -> {
                     //En caso de que la petición no sea exitosa se muestra un mensaje de error
                     _eventFlow.emit(UiState.SnackbarEvent(loginResult.result.message ?: "Error!"))
                 }
-
                 else -> {
                     //Nothing
                 }

@@ -1,6 +1,5 @@
 package com.example.codechallangebankapp.features.homeScreen
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,20 +32,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
+import com.example.codechallangebankapp.core.states.AccountState
 import com.example.codechallangebankapp.core.utils.AppTimer
 import com.example.codechallangebankapp.domain.models.AccountsModel
-import com.example.codechallangebankapp.features.MainActivity
 import com.example.codechallangebankapp.features.navigation.AppScreens
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -59,17 +56,22 @@ fun HomeScreen(
     username: String,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+    //recuperamos el States del viewmodel
+    val resultState = viewModel.accountsState.value
+    val isLoading by viewModel.isLoadingSwipe.collectAsState()
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
+    //Se inicializa el eventos iniciales en la creacion de la pantalla de home
     LaunchedEffect(Unit) {
+        //Se realiza la peticiion de cuentas al useCase
         viewModel.getAccountsList(username)
         val timer = System.currentTimeMillis() + 2 * 60 * 1000
+        //Se actualiza el token
         viewModel.updateToken(timer)
         AppTimer.startTimer {
             navController.popBackStack()
             navController.navigate(AppScreens.LoginScreen.route)
         }
     }
-    val isLoading by viewModel.isLoadingSwipe.collectAsState()
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = "Productos", color = Color.White) },
@@ -84,7 +86,7 @@ fun HomeScreen(
                 SwipeRefreshIndicator(
                     state = state,
                     refreshTriggerDistance = refreshTrigger,
-                    backgroundColor = Color.Blue,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 )
             },
@@ -95,7 +97,8 @@ fun HomeScreen(
                     .fillMaxSize()
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
-                SearchResultsList(viewModel, navController, username,swipeRefreshState.isRefreshing)
+                //Se muestra la lista de cuentas
+                SearchResultsList(viewModel,resultState, navController, username,swipeRefreshState.isRefreshing)
             }
         }
     }
@@ -105,13 +108,12 @@ fun HomeScreen(
 @Composable
 fun SearchResultsList(
     viewModel: HomeViewModel,
+    resultState: AccountState,
     navController: NavController,
     username: String,
     swipeRefreshState: Boolean
 ) {
-    //recuperamos el estado del viewmodel
-    val resultState = viewModel.accountsState.value
-    //si esta cargando mostramos el progressbar
+    //si esta cargando mostramos el loaderFullScreen
     if (resultState.isLoading) {
         Box(
             modifier = Modifier
@@ -122,7 +124,7 @@ fun SearchResultsList(
             FullScreenLoader()
         }
     }
-    //si hay un error mostramos el mensaje, este mensaje contiene el error de la llamada a la api
+    //si hay un error mostramos el dialogo
     if (resultState.error.isNotBlank()) {
         Box(
             modifier = Modifier
@@ -139,7 +141,7 @@ fun SearchResultsList(
             )
         }
     }
-    //si el homeState tiene datos mostramos la lista
+    //si el resultState tiene datos mostramos la lista
     resultState.data?.let { recipeListData ->
         Modifier
             .padding(top = 18.dp)

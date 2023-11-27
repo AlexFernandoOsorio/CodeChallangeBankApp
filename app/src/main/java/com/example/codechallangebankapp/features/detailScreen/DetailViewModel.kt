@@ -19,13 +19,13 @@ class DetailViewModel @Inject constructor(
     private val accountsUseCase: AccountsUseCase
 ) : ViewModel() {
 
+    //Se inicializa los estados de la pantalla de detalle
     private var _loadingState = mutableStateOf(LoadState())
     val loadingState: State<LoadState> = _loadingState
-
     private val _accountsMovementsState = mutableStateOf(AccountMovementsState())
     val accountsMovementsState: State<AccountMovementsState> get() = _accountsMovementsState
 
-
+    //Metodo que se encarga de realizar la petición de los movimientos de la cuenta
     suspend fun getAccountMovementsList(numberAccount: String) {
         _loadingState.value = loadingState.value.copy(isLoading = true)
         accountsUseCase.getAccountMovementsApi(numberAccount).onEach {
@@ -54,11 +54,9 @@ class DetailViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    //Metodo que se encarga de realizar la petición de actualizar el token
     suspend fun updateToken(timer : Long){
         var newToken = "faltaServicioParaObtenerNuevoToken"
-        /*accountsUseCase.getToken().collectLatest{
-            newToken= it.token
-        }*/
         accountsUseCase.updateToken(newToken,timer)
     }
 }

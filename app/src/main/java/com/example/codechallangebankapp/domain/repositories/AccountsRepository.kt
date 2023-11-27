@@ -10,5 +10,5 @@ interface AccountsRepository {
     suspend fun getUpdatedAccountsListApi(username: String): AccountsModel
     suspend fun getAccountMovementsApi(numeroCuenta: String): List<AccountMovementModel>
     suspend fun updateToken(token: String, timer: Long)
-    suspend fun getToken(): Flow<UserToken>
+    fun getToken(): Flow<UserToken>
 }

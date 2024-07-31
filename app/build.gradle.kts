@@ -103,6 +103,11 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.27.0")
     // Datastore
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
+    //taggeo
+    //implementation ("com.adobe.marketing.mobile:sdk-core:1.0.0")
+    //implementation ("com.adobe.marketing.mobile:userprofile:1.0.0")
+    //implementation ("com.adobe.marketing.mobile:analytics:1.0.0")
 }
 
 kapt {

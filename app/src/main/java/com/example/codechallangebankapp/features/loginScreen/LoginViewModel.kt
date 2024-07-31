@@ -1,11 +1,14 @@
 package com.example.codechallangebankapp.features.loginScreen
 
+import android.accounts.NetworkErrorException
+import android.content.res.Resources
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.codechallangebankapp.core.components.TextFieldState
 import com.example.codechallangebankapp.core.states.LoadState
+import com.example.codechallangebankapp.core.utils.ClientError
 import com.example.codechallangebankapp.core.utils.ResourceEvent
 import com.example.codechallangebankapp.domain.usecases.LoginAuthUseCase
 import com.example.codechallangebankapp.features.UiState
@@ -59,19 +62,31 @@ class LoginViewModel @Inject constructor(
             delay(3000)
             _loginState.value = loginState.value.copy(isLoading = false)
             //Se valida el resultado de la petición
-            when (loginResult.result) {
-                is ResourceEvent.Success -> {
-                    //En caso de que la petición sea exitosa se navega a la pantalla de Home
+            loginResult.result?.fold(
+                onSuccess = {
                     _eventFlow.emit(UiState.NavigateEvent(AppScreens.HomeScreen.route))
+                },
+                onFailure = {exception ->
+
+                    when(exception){
+                        is NetworkErrorException -> {
+                            _eventFlow.emit(UiState.SnackbarEvent("Error Red"))
+                        }
+                        is Resources.NotFoundException -> {
+                            _eventFlow.emit(UiState.SnackbarEvent("Error Servidor"))
+                        }
+                        is ClientError.ApiError -> {
+                            _eventFlow.emit(UiState.SnackbarEvent("Error Cliente Personalizado"))
+                        }
+                        is ClientError.LegacyError -> {
+                            _eventFlow.emit(UiState.SnackbarEvent("Error Legacy"))
+                        }
+                        else -> {
+                            _eventFlow.emit(UiState.SnackbarEvent("Error Otro"))
+                        }
+                    }
                 }
-                is ResourceEvent.Error -> {
-                    //En caso de que la petición no sea exitosa se muestra un mensaje de error
-                    _eventFlow.emit(UiState.SnackbarEvent(loginResult.result.message ?: "Error!"))
-                }
-                else -> {
-                    //Nothing
-                }
-            }
+            )
         }
     }
 }

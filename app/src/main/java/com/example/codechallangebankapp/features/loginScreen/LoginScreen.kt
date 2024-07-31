@@ -1,6 +1,7 @@
 package com.example.codechallangebankapp.features.loginScreen
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +61,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.codechallangebankapp.R
 import com.example.codechallangebankapp.core.components.TextFieldState
+import com.example.codechallangebankapp.core.extensions.tagEventAdobe
+import com.example.codechallangebankapp.core.utils.TaggeoManager
 import com.example.codechallangebankapp.features.UiState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -195,6 +199,13 @@ fun LoginScreen(
                                 viewModel.loginUser()
                                 //Se oculta el teclado
                                 keyboardController?.hide()
+
+                                // Tageo
+                                /*val context = LocalContext
+                                if (context is Activity) {
+                                    // Llama a tagEventAdobe en la Activity
+                                    context.tagEventAdobe(context, TaggeoManager.AppointmentCategoryTag.HOME_SCREEN)
+                                }*/
                             },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             shape = RoundedCornerShape(8.dp),

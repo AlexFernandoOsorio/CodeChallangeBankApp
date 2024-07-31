@@ -26,5 +26,35 @@ class LoginAuthUseCase @Inject constructor(
         return LoginResultModel(
             result = loginRepository.loginCallApi(username, password)
         )
+
+
+        /*suspend fun handleLogin(username: String, password: String) {
+            val result = loginRepository.loginCallApi(username, password)
+            result
+                .onSuccess {
+                    // Procesar éxito
+                    println("Login exitoso")
+                }
+                .onFailure { exception ->
+                    // Manejar diferentes tipos de errores
+                    when (exception) {
+                        is ClientError.ApiError -> {
+                            println("API Error: ${exception.apiErrorModel.message}")
+                        }
+                        is ClientError.LegacyError -> {
+                            println("Legacy Error: ${exception.message}")
+                        }
+                        is NetworkErrorException -> {
+                        // Manejar error de red
+                        }
+                        is NotFoundException -> {
+                        // Manejar error de no encontrado
+                        }
+                        else -> {
+                            println("Otro Error: ${exception.message}")
+                        }
+                    }
+                }
+        }*/
     }
 }

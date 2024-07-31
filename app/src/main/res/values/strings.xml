@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">CodeChallangeBankApp</string>
+
+    <!--Taggeo-->
+    <string name="isu_event_name">page_view</string>
+    <string name="isu_home_app">home_app</string>
+    <string name="isu_home">home</string>
+    <string name="isu_clic">clic</string>
+    <string name="isu_input">input</string>
+    <string name="isu_button">button</string>
+    <string name="isu_icon">icon</string>
+    <string name="isu_banner">banner</string>
+    <string name="isu_tab">tab</string>
+    <string name="isu_view">view</string>
+    <string name="isu_calendar">calendar</string>
+    <string name="isu_slide">slide</string>
+    <string name="isu_modal_window">modal_window</string>
+    <string name="isu_text_link">text_link</string>
+    <string name="isu_download">descarga</string>
+    <string name="isu_share">compartir</string>
+    <string name="isu_category_extra_data">category_extra</string>
+    <string name="isu_page_view_extra_data">page_view_extra</string>
+    <string name="isu_banner_category">banner</string>
+    <string name="isu_menu_category">menu</string>
+
+    <!--Taggeo citas-->
+    <string name="isu_schedule_appointment">agendar_cita</string>
+    <string name="isu_clic_element">clic_element</string>
+    <string name="isu_continue_appointment">continuar_cita</string>
+    <string name="isu_new_appointment">nueva_cita</string>
+    <string name="isu_locate_your_workshop">ubica_taller</string>
+    <string name="isu_choose_workshop">selecciona_taller</string>
+    <string name="isu_choose_date">selecciona_fecha</string>
+    <string name="isu_reason_appointment">motivo_cita_$</string>
+    <string name="isu_complete_appointment">completa_cita</string>
+    <string name="isu_confirm_appointment">confirma_cita</string>
 </resources>

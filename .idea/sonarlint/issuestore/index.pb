@@ -87,3 +87,15 @@ D
 Yapp/src/test/java/com/example/codechallangebankapp/domain/usecases/AccountsUseCaseTest.kt,a/2/a2a026d0b22a17db8a55c133ed913651be6cfb77
 Š
 Zapp/src/test/java/com/example/codechallangebankapp/domain/usecases/LoginAuthUseCaseTest.kt,6/4/64f0e170cec7a1461e4703ba113c025d7ca77660
+9
+	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
+P
+ app/src/main/AndroidManifest.xml,8/c/8c55c3ccc257e5907959013f99656e4c8ec3903e
+„
+Tapp/src/main/java/com/example/codechallangebankapp/core/extensions/ViewExtensions.kt,f/0/f07f99d982a552ebedaaca0ec3aa288964a8d0a7
+~
+Napp/src/main/java/com/example/codechallangebankapp/core/utils/TaggeoManager.kt,2/6/260c41a311887418e1155f49ae2ee5af49ca3580
+@
+build.gradle.kts,d/b/dbcff70658daf80b53ce624f6adcaa529df5ed8d
+|
+Lapp/src/main/java/com/example/codechallangebankapp/core/utils/ClientError.kt,4/7/47c262e773d2ea619b3e547ad97f81e439d4750d
